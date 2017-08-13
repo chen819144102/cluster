@@ -1,13 +1,14 @@
-function [keyPointsNum, represenParagraphsIdx, IDX] = som_kemans_processing(normalizedData)
-
+function [keyPointsNum, represenParagraphsIdx, IDX] = som_kemans_processing(normalizedData, dimensionX, dimensionY)
+% This function is to deal with cluster processing, including SOM and KMeans %
+% Don't modify this file casually %
 
 %--*******************first part: SOM*************************************************--%
 x = normalizedData';
 
-        dimensionX = 10;
-        dimensionY = 10; 
+%         dimensionX = 1;
+%         dimensionY = 2; 
         somClusteringNum = dimensionX * dimensionY;
-        fprintf(straw_columat('SOM: Clustering into',32, num2str(somClusteringNum), ' clusters\n'));
+        fprintf(strcat('SOM: Clustering into',32, num2str(somClusteringNum), ' clusters\n'));
         dimension = [dimensionX dimensionY];
         % Note: selforgmap(dimensions,coverSteps,initNeighbor,topologyFcn,distanceFcn)
         net = selforgmap(dimension);
@@ -24,7 +25,7 @@ x = normalizedData';
         kmeansInitialCenterIdx = [];
 %         figure();               % for center of every cluster
        % fprintf(straw_columat('som clustering: Picking up characterization of ',32, num2str(somClusteringNum), ' key points and saved\n'));
-        for t = 1:x_*y_
+        for t = 1 : dimensionX * dimensionY
                eval(['a', num2str(t), '= find(z==', num2str(t),');'])
                %save the index of new_rawData classified into the cluster
                eval(['ay', num2str(t), '= normalizedData(a', num2str(t),', :);'])  
@@ -34,14 +35,15 @@ x = normalizedData';
                    [W, DI] = sort(D_sokm);
                    eval(['aindex = a', num2str(t), '(DI(1,:));'])
                   % eval(['apoint', num2str(t), '= normalizedData(aindex, :);'])
-                   eval(['kmeansInitialCenterIdx = [kmeansInitialCenterIdx; aindex', num2str(t),'];'])
+                   %eval(['kmeansInitialCenterIdx = [kmeansInitialCenterIdx; aindex', num2str(t),'];'])
+                   kmeansInitialCenterIdx = [kmeansInitialCenterIdx; aindex];
                end
 %                modified end
         end
 
   %--********************second part: kmeans*********************************--%
 [keyPointsNum,~] = size(kmeansInitialCenterIdx);
-fprintf(straw_columat('kmeans clustering: Picking up ',32, num2str(keyPointsNum), ' representative key paragraphs\n'));
+fprintf(strcat('kmeans clustering: Picking up ',32, num2str(keyPointsNum), ' representative key paragraphs\n'));
 kmeansInitialCentre = normalizedData(kmeansInitialCenterIdx,:);
 
 [IDX, C, SUMD, D]=kmeans(normalizedData,keyPointsNum,'Start',kmeansInitialCentre);
